@@ -2,9 +2,14 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
 import os
+import pandas as pd
+from collections import defaultdict
+
+
+number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy', 'explicit',
+ 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo']
 
 load_dotenv()
-global sp
 
 
 class Spot:
@@ -15,6 +20,29 @@ class Spot:
         client_creds_mgr = SpotifyClientCredentials(client_id, client_secret)
 
         self.sp = spotipy.Spotify(client_credentials_manager=client_creds_mgr)
+
+    def find_song(self, name, year):
+        song_data = defaultdict()
+        results = self.sp.search(q= 'track: {}'.format(name), limit=1)
+        print(results)
+        if results['tracks']['items'] == []:
+            return None
+
+        results = results['tracks']['items'][0]
+        track_id = results['id']
+        audio_features = self.sp.audio_features(track_id)[0]
+
+        song_data['name'] = [name]
+        song_data['year'] = [year]
+        song_data['explicit'] = [int(results['explicit'])]
+        song_data['duration_ms'] = [results['duration_ms']]
+        song_data['popularity'] = [results['popularity']]
+
+        for key, value in audio_features.items():
+            song_data[key] = value
+
+        return pd.DataFrame(song_data)
+
 
     def get_playlist_contents(self, link):
         playlist_URI = link.split("/")[-1].split("?")[0]
@@ -37,9 +65,3 @@ class Spot:
             tracks.append(trck)
         return tracks
 
-
-lk = input("Enter playlist: ")
-stp = Spot()
-ply = stp.get_playlist_contents(lk)
-
-print(ply[0])

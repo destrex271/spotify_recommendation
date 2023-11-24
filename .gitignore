@@ -2,3 +2,4 @@
 .cache
 venv
 src/spotify_data.csv
+src/*.csv

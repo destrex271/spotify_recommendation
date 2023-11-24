@@ -1,7 +1,9 @@
 spotipy
+plotly
 numpy
 matplotlib
 seaborn
 jupyter
 pandas
 python-dotenv
+scikit-learn
